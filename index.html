@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -31,7 +31,6 @@
             text-align: center;
         }
 
-        /* Область с текстом и гифкой всегда имеет место сверху */
         .content-area {
             flex-shrink: 0;
             margin-bottom: 20px;
@@ -39,7 +38,7 @@
         }
 
         img {
-            max-width: 140px;
+            max-width: 150px;
             border-radius: 20px;
             margin-bottom: 10px;
         }
@@ -50,14 +49,12 @@
             margin: 0;
         }
 
-        /* Контейнер для кнопки Да, который растет */
         .yes-wrapper {
             flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            max-height: 60vh; /* Занимает до 60% высоты экрана */
         }
 
         #yesBtn {
@@ -69,7 +66,7 @@
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
-            transition: all 0.2s ease-out;
+            transition: transform 0.2s ease-out;
             box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
             z-index: 5;
         }
@@ -116,7 +113,7 @@
     </div>
 
     <div id="victory" class="container hidden" style="justify-content: center;">
-        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/KztT2c4u8mYYUiCi7C/giphy.gif" alt="Ура">
+        <img src="https://media.tenor.com/E2m766I6_pQAAAAC/h.gif" alt="Любовь">
         <h1 style="color: #ff4d6d;">Спасибо тебе огромное, люблю :3</h1>
         <button id="resetBtn">Повторить</button>
     </div>
@@ -145,13 +142,12 @@
                 newX = Math.random() * (window.innerWidth - noBtn.offsetWidth - 40) + 20;
                 newY = Math.random() * (window.innerHeight - noBtn.offsetHeight - 40) + 20;
 
-                // Не попадать на заголовок и на текущую кнопку Да
                 const hitHeader = (newY < hRect.bottom + 10);
                 const hitYes = (
-                    newX < yRect.right + 10 &&
-                    newX + noBtn.offsetWidth > yRect.left - 10 &&
-                    newY < yRect.bottom + 10 &&
-                    newY + noBtn.offsetHeight > yRect.top - 10
+                    newX < yRect.right + 20 &&
+                    newX + noBtn.offsetWidth > yRect.left - 20 &&
+                    newY < yRect.bottom + 20 &&
+                    newY + noBtn.offsetHeight > yRect.top - 20
                 );
 
                 if (!hitHeader && !hitYes) isSafe = true;
@@ -166,7 +162,6 @@
             noBtn.style.position = 'absolute';
             noBtn.style.left = `${yRect.left}px`;
             noBtn.style.top = `${yRect.bottom + 20}px`;
-            // Если вылезло за экран снизу
             if (yRect.bottom + 80 > window.innerHeight) {
                 noBtn.style.top = `${yRect.top - 60}px`;
             }
@@ -174,10 +169,8 @@
 
         noBtn.addEventListener('click', () => {
             scale += 0.5;
-            // Увеличиваем масштаб самой кнопки
             yesBtn.style.transform = `scale(${scale})`;
             
-            // Если кнопка стала очень большой, ограничиваем её рост, чтобы не вылезла за края
             if (scale > 6) {
                 noBtn.style.display = 'none';
             }
