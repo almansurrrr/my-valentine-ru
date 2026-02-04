@@ -18,7 +18,7 @@
             margin: 0;
             background-color: #ffffff;
             font-family: 'Segoe UI', Roboto, sans-serif;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         .container {
@@ -26,47 +26,52 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            max-width: 100vw;
+            height: 100vh;
             padding: 20px;
             text-align: center;
         }
 
+        /* Область с текстом и гифкой всегда имеет место сверху */
         .content-area {
+            flex-shrink: 0;
             margin-bottom: 20px;
+            z-index: 10;
         }
 
         img {
-            max-width: 150px;
+            max-width: 140px;
             border-radius: 20px;
             margin-bottom: 10px;
         }
 
         h1 {
             color: #ff4d6d;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             margin: 0;
         }
 
-        /* Контейнер для кнопки Да, чтобы она не ломала верстку при росте */
+        /* Контейнер для кнопки Да, который растет */
         .yes-wrapper {
+            flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100px;
-            margin-top: 20px;
+            width: 100%;
+            max-height: 60vh; /* Занимает до 60% высоты экрана */
         }
 
         #yesBtn {
             background-color: #ff4d6d;
             color: white;
             padding: 15px 40px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             border: none;
-            border-radius: 15px;
+            border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
-            transition: all 0.3s ease; /* Плавное изменение размера */
-            white-space: nowrap;
+            transition: all 0.2s ease-out;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
+            z-index: 5;
         }
 
         #noBtn {
@@ -110,7 +115,7 @@
         <button id="noBtn">Нет</button>
     </div>
 
-    <div id="victory" class="container hidden">
+    <div id="victory" class="container hidden" style="justify-content: center;">
         <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/KztT2c4u8mYYUiCi7C/giphy.gif" alt="Ура">
         <h1 style="color: #ff4d6d;">Спасибо тебе огромное, люблю :3</h1>
         <button id="resetBtn">Повторить</button>
@@ -125,63 +130,61 @@
         const question = document.getElementById('question');
         const headerArea = document.getElementById('headerArea');
 
-        let paddingW = 40;
-        let paddingH = 15;
-        let fontSize = 1.1;
-
-        const phrases = ["Точно?", "Подумай ещё!", "Ну пожалуйста...", "Выхода нет!"];
+        let scale = 1;
+        const phrases = ["Точно?", "А если подумать?", "Ну позязя...", "Жми Да!", "Выхода нет!"];
         let phraseIndex = 0;
 
         function moveNoButton() {
-            const headerRect = headerArea.getBoundingClientRect();
-            const yesRect = yesBtn.getBoundingClientRect();
+            const hRect = headerArea.getBoundingClientRect();
+            const yRect = yesBtn.getBoundingClientRect();
             let newX, newY;
             let attempts = 0;
             let isSafe = false;
 
-            while (!isSafe && attempts < 50) {
+            while (!isSafe && attempts < 30) {
                 newX = Math.random() * (window.innerWidth - noBtn.offsetWidth - 40) + 20;
                 newY = Math.random() * (window.innerHeight - noBtn.offsetHeight - 40) + 20;
 
-                const hitHeader = (newY < headerRect.bottom + 10);
+                // Не попадать на заголовок и на текущую кнопку Да
+                const hitHeader = (newY < hRect.bottom + 10);
                 const hitYes = (
-                    newX < yesRect.right + 10 &&
-                    newX + noBtn.offsetWidth > yesRect.left - 10 &&
-                    newY < yesRect.bottom + 10 &&
-                    newY + noBtn.offsetHeight > yesRect.top - 10
+                    newX < yRect.right + 10 &&
+                    newX + noBtn.offsetWidth > yRect.left - 10 &&
+                    newY < yRect.bottom + 10 &&
+                    newY + noBtn.offsetHeight > yRect.top - 10
                 );
 
                 if (!hitHeader && !hitYes) isSafe = true;
                 attempts++;
             }
-
             noBtn.style.left = `${newX}px`;
             noBtn.style.top = `${newY}px`;
         }
 
         function setInitialPos() {
-            const yesRect = yesBtn.getBoundingClientRect();
+            const yRect = yesBtn.getBoundingClientRect();
             noBtn.style.position = 'absolute';
-            // Смещение в сторону, чтобы не накладываться
-            noBtn.style.left = (yesRect.right + 20) > window.innerWidth ? `${yesRect.left}px` : `${yesRect.right + 20}px`;
-            noBtn.style.top = (yesRect.right + 20) > window.innerWidth ? `${yesRect.bottom + 20}px` : `${yesRect.top}px`;
+            noBtn.style.left = `${yRect.left}px`;
+            noBtn.style.top = `${yRect.bottom + 20}px`;
+            // Если вылезло за экран снизу
+            if (yRect.bottom + 80 > window.innerHeight) {
+                noBtn.style.top = `${yRect.top - 60}px`;
+            }
         }
 
         noBtn.addEventListener('click', () => {
-            // Увеличиваем физические размеры кнопки Да
-            paddingW += 20;
-            paddingH += 10;
-            fontSize += 0.2;
-
-            yesBtn.style.padding = `${paddingH}px ${paddingW}px`;
-            yesBtn.style.fontSize = `${fontSize}rem`;
+            scale += 0.5;
+            // Увеличиваем масштаб самой кнопки
+            yesBtn.style.transform = `scale(${scale})`;
+            
+            // Если кнопка стала очень большой, ограничиваем её рост, чтобы не вылезла за края
+            if (scale > 6) {
+                noBtn.style.display = 'none';
+            }
 
             moveNoButton();
             question.innerText = phrases[phraseIndex];
             phraseIndex = (phraseIndex + 1) % phrases.length;
-            
-            // Если кнопка Да стала слишком большой, скрываем Нет
-            if (paddingW > 200) noBtn.style.display = 'none';
         });
 
         yesBtn.addEventListener('click', () => {
@@ -190,9 +193,8 @@
         });
 
         resetBtn.addEventListener('click', () => {
-            paddingW = 40; paddingH = 15; fontSize = 1.1;
-            yesBtn.style.padding = `15px 40px`;
-            yesBtn.style.fontSize = `1.1rem`;
+            scale = 1;
+            yesBtn.style.transform = `scale(1)`;
             noBtn.style.display = 'block';
             question.innerText = "Будешь ли ты моей валентинкой?";
             setTimeout(setInitialPos, 100);
@@ -200,7 +202,7 @@
             quiz.classList.remove('hidden');
         });
 
-        window.onload = () => setTimeout(setInitialPos, 200);
+        window.onload = () => setTimeout(setInitialPos, 300);
     </script>
 </body>
 </html>
