@@ -30,41 +30,42 @@
             text-align: center;
         }
 
-        /* Текст и гифка ВСЕГДА сверху */
-        #mainGif, #question, #victory h1, #victory img {
+        /* Текст и гифка ВСЕГДА сверху (z-index 10) */
+        .content-area {
             position: relative;
-            z-index: 10000; 
-            pointer-events: none; /* Чтобы клики проходили сквозь текст к кнопке "Да" */
+            z-index: 10;
+            pointer-events: none; 
+            margin-bottom: 20px;
         }
 
         img {
-            max-width: 160px;
+            max-width: 150px;
             border-radius: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         h1 {
             color: #ff4d6d;
-            font-size: 1.6rem;
-            margin-bottom: 30px;
+            font-size: 1.5rem;
+            margin: 0;
         }
 
-        /* Кнопка "Да" - между текстом и кнопкой "Нет" */
+        /* Кнопка "Да" - уровень ниже текста (z-index 5) */
         #yesBtn {
             background-color: #ff4d6d;
             color: white;
             padding: 15px 40px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             border: none;
             border-radius: 15px;
             cursor: pointer;
             font-weight: bold;
             position: relative;
-            z-index: 5000; 
-            transition: transform 0.2s ease-out;
+            z-index: 5; 
+            transition: transform 0.3s ease-out;
         }
 
-        /* Кнопка "Нет" - на самом нижнем слое из кнопок */
+        /* Кнопка "Нет" - самый низ (z-index 1) */
         #noBtn {
             background-color: #f8f9fa;
             color: #6c757d;
@@ -74,8 +75,8 @@
             border-radius: 15px;
             cursor: pointer;
             position: absolute; 
-            z-index: 100; 
-            transition: left 0.3s ease, top 0.3s ease;
+            z-index: 1; 
+            transition: all 0.3s ease;
         }
 
         #resetBtn {
@@ -88,29 +89,29 @@
             margin-top: 20px;
             cursor: pointer;
             position: relative;
-            z-index: 10001; /* Выше всего на экране победы */
+            z-index: 100;
         }
 
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <div id="quiz" class="container">
-        <img id="mainGif" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/c76IJLufpNwSULPk77/giphy.gif" alt="Котик">
-        <h1 id="question">Будешь ли ты моей валентинкой?</h1>
-        
-        <div id="btnBlock" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-            <button id="yesBtn">Да</button>
-            <button id="noBtn">Нет</button>
+        <div class="content-area" id="headerArea">
+            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/c76IJLufpNwSULPk77/giphy.gif" alt="Котик">
+            <h1 id="question">Будешь ли ты моей валентинкой?</h1>
         </div>
+        
+        <div id="btnBlock" style="height: 60px; display: flex; align-items: center; justify-content: center;">
+            <button id="yesBtn">Да</button>
+        </div>
+        <button id="noBtn">Нет</button>
     </div>
 
     <div id="victory" class="container hidden">
         <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/KztT2c4u8mYYUiCi7C/giphy.gif" alt="Ура">
-        <h1>Спасибо тебе огромное, люблю :3</h1>
+        <h1 style="color: #ff4d6d;">Спасибо тебе огромное, люблю :3</h1>
         <button id="resetBtn">Повторить</button>
     </div>
 
@@ -121,30 +122,63 @@
         const quiz = document.getElementById('quiz');
         const victory = document.getElementById('victory');
         const question = document.getElementById('question');
+        const headerArea = document.getElementById('headerArea');
 
         let scale = 1;
-        const phrases = ["Уверена?", "Подумай!", "Ну позязя...", "Жми Да!", "Почти попала!"];
+        const phrases = ["Ты уверена?", "Подумай ещё!", "Ну пожалуйста...", "Почти нажала!", "Выхода нет!"];
         let phraseIndex = 0;
 
         function moveNoButton() {
-            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - 20) + 10;
-            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - 20) + 10;
-            noBtn.style.left = `${x}px`;
-            noBtn.style.top = `${y}px`;
-        }
-
-        // Установка начальной позиции кнопки "Нет"
-        function setInitialNoPos() {
-            noBtn.style.position = 'absolute';
+            const padding = 20;
+            const headerRect = headerArea.getBoundingClientRect();
             const yesRect = yesBtn.getBoundingClientRect();
-            noBtn.style.left = `${yesRect.left}px`;
-            noBtn.style.top = `${yesRect.bottom + 20}px`;
+
+            let newX, newY;
+            let isSafe = false;
+
+            // Цикл поиска безопасного места (не на тексте и не на кнопке "Да")
+            while (!isSafe) {
+                newX = Math.random() * (window.innerWidth - noBtn.offsetWidth - padding * 2) + padding;
+                newY = Math.random() * (window.innerHeight - noBtn.offsetHeight - padding * 2) + padding;
+
+                // Проверка: не пересекается ли с верхней зоной (текст/гифка)
+                const hitHeader = (newY < headerRect.bottom + 10);
+                
+                // Проверка: не пересекается ли с кнопкой "Да"
+                const hitYes = (
+                    newX < yesRect.right + 20 &&
+                    newX + noBtn.offsetWidth > yesRect.left - 20 &&
+                    newY < yesRect.bottom + 20 &&
+                    newY + noBtn.offsetHeight > yesRect.top - 20
+                );
+
+                if (!hitHeader && !hitYes) isSafe = true;
+                
+                // Защита от бесконечного цикла, если места совсем нет
+                if (scale > 10) isSafe = true; 
+            }
+
+            noBtn.style.left = `${newX}px`;
+            noBtn.style.top = `${newY}px`;
         }
 
-        window.onload = setInitialNoPos;
+        function setInitialPos() {
+            const yesRect = yesBtn.getBoundingClientRect();
+            noBtn.style.left = `${yesRect.right + 20}px`;
+            noBtn.style.top = `${yesRect.top}px`;
+            
+            // Если на мобилке кнопка "Нет" уходит за край, ставим под "Да"
+            if (parseInt(noBtn.style.left) + 100 > window.innerWidth) {
+                noBtn.style.left = `${yesRect.left}px`;
+                noBtn.style.top = `${yesRect.bottom + 20}px`;
+            }
+        }
+
+        window.onload = setInitialPos;
+        window.onresize = setInitialPos;
 
         noBtn.addEventListener('click', () => {
-            scale += 1.5; // Быстрый рост кнопки "Да"
+            scale += 0.4; // Плавный рост
             yesBtn.style.transform = `scale(${scale})`;
             moveNoButton();
             
@@ -161,8 +195,7 @@
             scale = 1;
             yesBtn.style.transform = `scale(${scale})`;
             question.innerText = "Будешь ли ты моей валентинкой?";
-            phraseIndex = 0;
-            setInitialNoPos();
+            setInitialPos();
             victory.classList.add('hidden');
             quiz.classList.remove('hidden');
         });
