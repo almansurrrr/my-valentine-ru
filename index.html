@@ -18,7 +18,7 @@
             margin: 0;
             background-color: #ffffff;
             font-family: 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden; /* Важно: чтобы не было прокрутки при прыжках кнопки */
+            overflow: hidden;
         }
 
         .container {
@@ -28,12 +28,6 @@
             width: 100%;
             padding: 20px;
             z-index: 10;
-            pointer-events: none; /* Пропускает клики сквозь контейнер к кнопкам */
-        }
-
-        /* Чтобы кнопки снова стали кликабельными */
-        .content-box, .buttons-wrapper {
-            pointer-events: auto;
         }
 
         img {
@@ -49,7 +43,6 @@
             margin-bottom: 30px;
             max-width: 300px;
             line-height: 1.3;
-            text-shadow: 0 0 10px rgba(255,255,255,0.8);
         }
 
         .buttons-wrapper {
@@ -82,9 +75,16 @@
             border: 1px solid #dee2e6;
             padding: 12px 20px;
             font-size: 1rem;
-            position: absolute; /* Позволяет кнопке летать */
+            position: absolute; 
             transition: left 0.3s ease, top 0.3s ease;
-            z-index: 50;
+        }
+
+        #resetBtn {
+            background-color: #adb5bd;
+            color: white;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            margin-top: 20px;
         }
 
         .hidden {
@@ -95,10 +95,8 @@
 <body>
 
     <div id="quiz" class="container">
-        <div class="content-box">
-            <img id="mainGif" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/c76IJLufpNwSULPk77/giphy.gif" alt="Котик">
-            <h1 id="question">Будешь ли ты моей валентинкой?</h1>
-        </div>
+        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/c76IJLufpNwSULPk77/giphy.gif" alt="Котик">
+        <h1 id="question">Будешь ли ты моей валентинкой?</h1>
         <div class="buttons-wrapper">
             <button id="yesBtn">Да</button>
             <button id="noBtn">Нет</button>
@@ -108,71 +106,63 @@
     <div id="victory" class="container hidden">
         <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/KztT2c4u8mYYUiCi7C/giphy.gif" alt="Ура">
         <h1>Спасибо тебе огромное, люблю :3</h1>
+        <button id="resetBtn">Повторить</button>
     </div>
 
     <script>
         const yesBtn = document.getElementById('yesBtn');
         const noBtn = document.getElementById('noBtn');
+        const resetBtn = document.getElementById('resetBtn');
         const quiz = document.getElementById('quiz');
         const victory = document.getElementById('victory');
         const question = document.getElementById('question');
 
         let scale = 1;
-        
-        const phrases = [
-            "Уверена? :(",
-            "Подумай еще раз!",
-            "Ну позязя...",
-            "Жми Да!",
-            "У тебя нет выбора!",
-            "Кнопка убегает!",
-            "Всё равно не нажмешь :P"
-        ];
+        const initialQuestion = "Будешь ли ты моей валентинкой?";
+        const phrases = ["Уверена? :(", "Подумай еще!", "Ну позязя...", "Жми Да!", "Нет выбора!"];
         let phraseIndex = 0;
 
-        // Функция для перемещения кнопки "Нет"
         function moveNoButton() {
-            // Вычисляем случайные координаты, учитывая размеры экрана
-            // Оставляем небольшие отступы от краев (50px)
-            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - 50) + 25;
-            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - 50) + 25;
-
-            noBtn.style.position = 'absolute';
+            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - 40) + 20;
+            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - 40) + 20;
             noBtn.style.left = `${x}px`;
             noBtn.style.top = `${y}px`;
         }
 
-        // Изначально поставим кнопку "Нет" под кнопку "Да"
-        function initNoButton() {
-            const yesRect = yesBtn.getBoundingClientRect();
-            noBtn.style.left = `${yesRect.left}px`;
-            noBtn.style.top = `${yesRect.bottom + 20}px`;
-        }
-        
-        window.onload = initNoButton;
-
-        noBtn.addEventListener('click', () => {
-            // 1. Увеличиваем кнопку "Да"
-            scale += 0.5;
+        function resetGame() {
+            // Сбрасываем масштаб
+            scale = 1;
             yesBtn.style.transform = `scale(${scale})`;
             
-            // 2. Перемещаем кнопку "Нет"
-            moveNoButton();
+            // Сбрасываем тексты
+            question.innerText = initialQuestion;
+            phraseIndex = 0;
+            
+            // Возвращаем кнопку "Нет" в поток (убираем абсолютное позиционирование)
+            noBtn.style.position = 'static';
+            noBtn.style.display = 'inline-block';
+            
+            // Переключаем экраны
+            victory.classList.add('hidden');
+            quiz.classList.remove('hidden');
+        }
 
-            // 3. Меняем текст
+        noBtn.addEventListener('click', () => {
+            scale += 0.5;
+            yesBtn.style.transform = `scale(${scale})`;
+            noBtn.style.position = 'absolute';
+            moveNoButton();
             question.innerText = phrases[phraseIndex];
             phraseIndex = (phraseIndex + 1) % phrases.length;
-
-            // 4. Если "Да" стала огромной, скрываем "Нет" совсем
-            if (scale > 12) {
-                noBtn.style.display = 'none';
-            }
+            if (scale > 12) noBtn.style.display = 'none';
         });
 
         yesBtn.addEventListener('click', () => {
             quiz.classList.add('hidden');
             victory.classList.remove('hidden');
         });
+
+        resetBtn.addEventListener('click', resetGame);
     </script>
 </body>
 </html>
