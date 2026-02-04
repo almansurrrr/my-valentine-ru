@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Валентинка для тебя</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #ffe6ea;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        img {
+            max-width: 200px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #d63384;
+            font-size: 2rem;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        #yesBtn {
+            background-color: #ff4d6d;
+            color: white;
+            z-index: 100; /* Чтобы кнопка всегда была сверху */
+        }
+
+        #noBtn {
+            background-color: #adb5bd;
+            color: white;
+        }
+
+        /* Стиль для экрана победы */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="quiz">
+        <img id="mainGif" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/c76IJLufpNwSULPk77/giphy.gif" alt="Котик">
+        <h1 id="question">Будешь ли ты моей валентинкой?</h1>
+        <div class="buttons">
+            <button id="yesBtn">Да</button>
+            <button id="noBtn">Нет</button>
+        </div>
+    </div>
+
+    <div id="victory" class="hidden">
+        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/KztT2c4u8mYYUiCi7C/giphy.gif" alt="Ура">
+        <h1 style="color: #ff4d6d;">Спасибо тебе огромное, люблю :3</h1>
+    </div>
+
+    <script>
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const quiz = document.getElementById('quiz');
+        const victory = document.getElementById('victory');
+        const question = document.getElementById('question');
+
+        let scale = 1;
+        const phrases = [
+            "Ты уверена?",
+            "А если подумать?",
+            "Ну пожалуйста...",
+            "Я буду плакать :(",
+            "Кнопка 'Да' сама себя не нажмет!"
+        ];
+        let phraseIndex = 0;
+
+        noBtn.addEventListener('click', () => {
+            // Увеличиваем масштаб кнопки "Да"
+            scale += 0.5;
+            yesBtn.style.transform = `scale(${scale})`;
+            
+            // Меняем текст вопроса для интереса
+            question.innerText = phrases[phraseIndex];
+            phraseIndex = (phraseIndex + 1) % phrases.length;
+
+            // Немного отодвигаем кнопку "Нет", если нужно
+            if (scale > 10) {
+                noBtn.style.display = 'none'; // Скрываем "Нет", когда "Да" уже на весь экран
+            }
+        });
+
+        yesBtn.addEventListener('click', () => {
+            quiz.classList.add('hidden');
+            victory.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
