@@ -12,82 +12,78 @@
 
         body {
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            background-color: #ffffff; /* Чистый белый фон */
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            text-align: center;
-            overflow: hidden; /* Чтобы не было прокрутки при росте кнопки */
+            background-color: #ffffff;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
         }
 
         .container {
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100%;
+            padding: 20px;
+            transition: all 0.3s ease;
         }
 
         img {
-            max-width: 180px;
-            width: 100%;
+            max-width: 150px;
             height: auto;
             border-radius: 20px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         h1 {
             color: #ff4d6d;
             font-size: 1.5rem;
             margin-bottom: 30px;
-            min-height: 3rem;
+            max-width: 300px;
+            line-height: 1.3;
         }
 
-        .buttons-container {
+        .buttons-wrapper {
             display: flex;
             flex-direction: row;
             justify-content: center;
             align-items: center;
             gap: 15px;
+            flex-wrap: wrap; /* Чтобы кнопки могли переноситься, если "Да" станет огромной */
             width: 100%;
-            position: relative;
         }
 
         button {
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: bold;
             border: none;
-            border-radius: 50px;
+            border-radius: 15px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-weight: bold;
+            transition: all 0.2s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #yesBtn {
             background-color: #ff4d6d;
             color: white;
-            z-index: 1000;
-            white-space: nowrap;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            min-width: 80px;
         }
 
         #noBtn {
             background-color: #f8f9fa;
             color: #6c757d;
             border: 1px solid #dee2e6;
-            z-index: 1;
+            padding: 15px 25px;
+            font-size: 1rem;
         }
 
         .hidden {
             display: none !important;
-        }
-
-        #victory h1 {
-            font-size: 1.8rem;
-            padding: 0 10px;
         }
     </style>
 </head>
@@ -95,10 +91,8 @@
 
     <div id="quiz" class="container">
         <img id="mainGif" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/c76IJLufpNwSULPk77/giphy.gif" alt="Котик">
-        
         <h1 id="question">Будешь ли ты моей валентинкой?</h1>
-        
-        <div class="buttons-container">
+        <div class="buttons-wrapper">
             <button id="yesBtn">Да</button>
             <button id="noBtn">Нет</button>
         </div>
@@ -116,35 +110,33 @@
         const victory = document.getElementById('victory');
         const question = document.getElementById('question');
 
-        let scale = 1;
-        let noOffset = 0;
+        let paddingVal = 15;
+        let fontSizeVal = 1.2;
         
         const phrases = [
-            "Ты уверена?",
-            "Точно-точно?",
-            "Подумай еще раз!",
-            "Ну пожалуйста :(",
-            "Я сейчас расплачусь...",
-            "Да нажми ты уже 'Да'!"
+            "Уверена? :(",
+            "Подумай хорошенько!",
+            "Ну позязя...",
+            "Жми Да!",
+            "У тебя нет выбора!"
         ];
         let phraseIndex = 0;
 
         noBtn.addEventListener('click', () => {
-            // Увеличиваем масштаб кнопки "Да"
-            scale += 0.4;
-            yesBtn.style.transform = `scale(${scale})`;
+            // Увеличиваем внутренние отступы и шрифт кнопки "Да"
+            paddingVal += 15;
+            fontSizeVal += 0.3;
             
-            // Сдвигаем кнопку "Нет" вправо, чтобы её не перекрыло сразу
-            noOffset += 30;
-            noBtn.style.transform = `translateX(${noOffset}px)`;
+            yesBtn.style.padding = `${paddingVal}px ${paddingVal * 2}px`;
+            yesBtn.style.fontSize = `${fontSizeVal}rem`;
 
             // Меняем текст
             question.innerText = phrases[phraseIndex];
             phraseIndex = (phraseIndex + 1) % phrases.length;
 
-            // Если кнопка "Да" стала слишком большой, прячем "Нет"
-            if (scale > 8) {
-                noBtn.classList.add('hidden');
+            // Если кнопка стала слишком большой, скрываем кнопку "Нет"
+            if (fontSizeVal > 4) {
+                noBtn.style.display = 'none';
             }
         });
 
