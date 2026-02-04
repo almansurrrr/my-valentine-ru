@@ -18,7 +18,7 @@
             margin: 0;
             background-color: #ffffff;
             font-family: 'Segoe UI', Roboto, sans-serif;
-            overflow-x: hidden;
+            overflow: hidden; /* Важно: чтобы не было прокрутки при прыжках кнопки */
         }
 
         .container {
@@ -27,11 +27,17 @@
             align-items: center;
             width: 100%;
             padding: 20px;
-            transition: all 0.3s ease;
+            z-index: 10;
+            pointer-events: none; /* Пропускает клики сквозь контейнер к кнопкам */
+        }
+
+        /* Чтобы кнопки снова стали кликабельными */
+        .content-box, .buttons-wrapper {
+            pointer-events: auto;
         }
 
         img {
-            max-width: 150px;
+            max-width: 160px;
             height: auto;
             border-radius: 20px;
             margin-bottom: 20px;
@@ -43,15 +49,14 @@
             margin-bottom: 30px;
             max-width: 300px;
             line-height: 1.3;
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
         }
 
         .buttons-wrapper {
             display: flex;
-            flex-direction: row;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            gap: 15px;
-            flex-wrap: wrap; /* Чтобы кнопки могли переноситься, если "Да" станет огромной */
+            gap: 20px;
             width: 100%;
         }
 
@@ -61,25 +66,25 @@
             cursor: pointer;
             font-weight: bold;
             transition: all 0.2s ease-out;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         #yesBtn {
             background-color: #ff4d6d;
             color: white;
-            padding: 15px 30px;
+            padding: 15px 35px;
             font-size: 1.2rem;
-            min-width: 80px;
+            z-index: 100;
         }
 
         #noBtn {
             background-color: #f8f9fa;
             color: #6c757d;
             border: 1px solid #dee2e6;
-            padding: 15px 25px;
+            padding: 12px 20px;
             font-size: 1rem;
+            position: absolute; /* Позволяет кнопке летать */
+            transition: left 0.3s ease, top 0.3s ease;
+            z-index: 50;
         }
 
         .hidden {
@@ -90,8 +95,10 @@
 <body>
 
     <div id="quiz" class="container">
-        <img id="mainGif" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/c76IJLufpNwSULPk77/giphy.gif" alt="Котик">
-        <h1 id="question">Будешь ли ты моей валентинкой?</h1>
+        <div class="content-box">
+            <img id="mainGif" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/c76IJLufpNwSULPk77/giphy.gif" alt="Котик">
+            <h1 id="question">Будешь ли ты моей валентинкой?</h1>
+        </div>
         <div class="buttons-wrapper">
             <button id="yesBtn">Да</button>
             <button id="noBtn">Нет</button>
@@ -110,32 +117,54 @@
         const victory = document.getElementById('victory');
         const question = document.getElementById('question');
 
-        let paddingVal = 15;
-        let fontSizeVal = 1.2;
+        let scale = 1;
         
         const phrases = [
             "Уверена? :(",
-            "Подумай хорошенько!",
+            "Подумай еще раз!",
             "Ну позязя...",
             "Жми Да!",
-            "У тебя нет выбора!"
+            "У тебя нет выбора!",
+            "Кнопка убегает!",
+            "Всё равно не нажмешь :P"
         ];
         let phraseIndex = 0;
 
-        noBtn.addEventListener('click', () => {
-            // Увеличиваем внутренние отступы и шрифт кнопки "Да"
-            paddingVal += 15;
-            fontSizeVal += 0.3;
-            
-            yesBtn.style.padding = `${paddingVal}px ${paddingVal * 2}px`;
-            yesBtn.style.fontSize = `${fontSizeVal}rem`;
+        // Функция для перемещения кнопки "Нет"
+        function moveNoButton() {
+            // Вычисляем случайные координаты, учитывая размеры экрана
+            // Оставляем небольшие отступы от краев (50px)
+            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - 50) + 25;
+            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - 50) + 25;
 
-            // Меняем текст
+            noBtn.style.position = 'absolute';
+            noBtn.style.left = `${x}px`;
+            noBtn.style.top = `${y}px`;
+        }
+
+        // Изначально поставим кнопку "Нет" под кнопку "Да"
+        function initNoButton() {
+            const yesRect = yesBtn.getBoundingClientRect();
+            noBtn.style.left = `${yesRect.left}px`;
+            noBtn.style.top = `${yesRect.bottom + 20}px`;
+        }
+        
+        window.onload = initNoButton;
+
+        noBtn.addEventListener('click', () => {
+            // 1. Увеличиваем кнопку "Да"
+            scale += 0.5;
+            yesBtn.style.transform = `scale(${scale})`;
+            
+            // 2. Перемещаем кнопку "Нет"
+            moveNoButton();
+
+            // 3. Меняем текст
             question.innerText = phrases[phraseIndex];
             phraseIndex = (phraseIndex + 1) % phrases.length;
 
-            // Если кнопка стала слишком большой, скрываем кнопку "Нет"
-            if (fontSizeVal > 4) {
+            // 4. Если "Да" стала огромной, скрываем "Нет" совсем
+            if (scale > 12) {
                 noBtn.style.display = 'none';
             }
         });
